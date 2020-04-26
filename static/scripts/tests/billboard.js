@@ -252,7 +252,7 @@ class Covid19Monument {
 		*/
 
 		
-		var texture = new THREE.TextureLoader().load( "/static/images/spark1.png" );
+		var texture = new THREE.TextureLoader().load( "/threetest/static/images/spark1.png" );
 		var material = new THREE.ShaderMaterial( {
 			uniforms: {
 				color: { value: new THREE.Color( 0xffffff ) },
