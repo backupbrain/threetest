@@ -137,6 +137,7 @@ class Covid19Monument {
 	particleProperties = null; // uninitialized;
 	visibles = []; // not initialized
 	numUnlockedSoFar = 0;
+	selected = 20;
 
 
 	constructor(environment) {
@@ -240,7 +241,7 @@ class Covid19Monument {
 		this.particleCount = particleCount;
 
 		/*
-		var material = new THREE.PointsMaterial({
+		var pointMaterial = new THREE.PointsMaterial({
 			size: 30,
 			sizeAttenuation: true,
 			alphaTest: 1,
@@ -291,16 +292,17 @@ class Covid19Monument {
 				//	map: texture
 				//} );
 
-				material.map = texture;
+				pointMaterial.map = texture;
 				//material.alphaMap = texture;
-				material.needsUpdate = true;
+				pointMaterial.needsUpdate = true;
 			},
 			undefined,
 			err => {
-				console.error( 'An error happened.' );
+				console.error( 'An error occurred while loading texture.' );
 			}
 		);
 		*/
+		
 
 
 		var colors = [];
@@ -337,6 +339,15 @@ class Covid19Monument {
 		geometry.setAttribute( 'ca', new THREE.Float32BufferAttribute( colors, 3 ) );
 
 		var particles = new THREE.Points( geometry, material );
+
+
+		this.particleLight = new THREE.Mesh(
+			new THREE.SphereBufferGeometry( 4, 8, 8 ),
+			new THREE.MeshBasicMaterial( { color: 0x999999 } )
+		);
+		this.environment.addToScene(this.particleLight);
+
+		this.vertices = vertices;
 		this.particles = particles;
 		this.environment.addToScene(particles);
 		this.geometry = geometry;
@@ -354,9 +365,9 @@ class Covid19Monument {
 			this.animationStartedAt = Date.now();
 		}
 		var animationTime_s = (Date.now() - this.animationStartedAt) / 1000;
-		console.log(animationTime_s);
+		//console.log(animationTime_s);
 		var numToUnlockAtThisPoint =  Math.ceil(this.particleCount * (1.2 * Math.atan(animationTime_s/5 - 3)/Math.PI + 0.48));
-		console.log(numToUnlockAtThisPoint);
+		//console.log(numToUnlockAtThisPoint);
 
 		//var timeSinceLastUpdate = Date.now() - this.lastUpdateTime;
 		var time = Date.now() * 0.005;
@@ -371,10 +382,21 @@ class Covid19Monument {
 					this.numUnlockedSoFar += 1;
 				}
 			}
+			if (this.selected) {
+				sizes[this.selected] = 500;
+				this.environment.camera.lookAt(this.vertices[i * 3], this.vertices[i * 3 + 1], this.vertices[i * 3 + 2]);
+			} else {
+				this.environment.camera.lookAt(0, 0, 0);
+			}
 		}
 		this.geometry.attributes.size.needsUpdate = true;
 		this.environment.animate();
 		//this.lastUpdateTime += timeSinceLastUpdate;
+
+
+		this.particleLight.position.x = Math.sin( time * 0.07 ) * 100;
+		this.particleLight.position.y = Math.cos( time * 0.05 ) * 200;
+		this.particleLight.position.z = Math.cos( time * 0.03 ) * 150;
 	}
 
 	onDocumentTouchStart(event) {
